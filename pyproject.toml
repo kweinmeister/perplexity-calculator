@@ -1,0 +1,30 @@
+[project]
+name = "perplexity-calculator"
+version = "0.1.0"
+description = "A perplexity calculator for Large Language Models using ONNX Runtime GenAI."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "huggingface-hub>=1.3.2",
+    "numpy>=2.4.1",
+    "onnxruntime-genai>=0.11.4",
+    "tokenizers>=0.22.2",
+    "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "memray>=1.19.1",
+    "pytest>=9.0.2",
+    "pytest-benchmark>=5.2.3",
+    "ruff>=0.14.13",
+    "ty>=0.0.12",
+]
+
+[tool.pyrefly]
+search-path = ["typings"]
+site-package-path = ["typings"]
+infer-with-first-use = false
+
+[tool.ty.environment]
+extra-paths = ["typings"]

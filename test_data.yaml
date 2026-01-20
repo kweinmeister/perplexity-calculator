@@ -1,0 +1,129 @@
+- description: Short Greeting
+  text: Hello world! This is a short sentence.
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 44.6513
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 36.9409
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 40.5575
+- description: Medium Prose
+  text: The quick brown fox jumps over the lazy dog. This pangram contains every letter
+    of the English alphabet. It is widely used for checking fonts and typewriters.
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 23.929
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 14.7488
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 16.1547
+- description: Python Code Snippet
+  text: "def fibonacci(n):\n    if n <= 1:\n        return n\n    else:\n        return\
+    \ fibonacci(n-1) + fibonacci(n-2)\n"
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 1.7728
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 2.0283
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 2.2518
+- description: SQL Query
+  text: SELECT user_id, count(*) as order_count FROM orders WHERE order_date >= '2023-01-01'
+    GROUP BY user_id HAVING count(*) > 5 ORDER BY order_count DESC;
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 4.1589
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 3.413
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 4.702
+- description: Dialogue
+  text: 'User: Can you explain quantum entanglement?
+
+    AI: Quantum entanglement is a phenomenon where particles become correlated in
+    such a way that the state of one instantaneously influences the other, regardless
+    of distance.
+
+    User: That sounds spooky.
+
+    AI: Einstein actually called it "spooky action at a distance".
+
+    '
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 8.1653
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 5.4101
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 7.8164
+- description: JSON Data
+  text: "{\n  \"project\": \"perplexity-estimator\",\n  \"version\": \"1.0.0\",\n\
+    \  \"dependencies\": [\"onnxruntime-genai\", \"numpy\", \"huggingface-hub\"],\n\
+    \  \"active\": true\n}\n"
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 16.4559
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 10.7316
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 11.1362
+- description: Poetry/Lyrics
+  text: 'Two roads diverged in a yellow wood,
+
+    And sorry I could not travel both
+
+    And be one traveler, long I stood
+
+    And looked down one as far as I could
+
+    To where it bent in the undergrowth;
+
+    '
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 5.2856
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 43.3607
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 10.1875
+- description: Scientific Abstract
+  text: We present a novel approach to unsupervised learning that leverages geometric
+    transformations. By embedding data points into a high-dimensional manifold, we
+    observe distinct clustering patterns that correspond to latent semantic features.
+    Our experiments demonstrate state-of-the-art performance.
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 17.5093
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 16.3239
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 13.1053
+- description: Markdown Structure
+  text: "# Header 1\n## Header 2\n- Bullet point 1\n- Bullet point 2\n  - Nested item\n\
+    \n**Bold text** and *italic text*.\n[Link](https://example.com)\n"
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 13.891
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 7.0083
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 10.4086
+- description: Repetitive Text
+  text: "Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ Perplexity is a measurement of how well a probability model predicts a sample.\
+    \ \n"
+  perplexity:
+    onnx-community/SmolLM2-135M-ONNX:
+      model.onnx: 1.8022
+    onnx-community/Qwen3-0.6B-DQ-ONNX:
+      model_q4f16.onnx: 1.7187
+    onnx-community/Llama-3.2-1B-Instruct-ONNX:
+      model.onnx: 1.8232
