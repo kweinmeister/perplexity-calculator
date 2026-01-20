@@ -18,7 +18,7 @@ def loaded_model() -> tuple[perplexity.ModelContext, str]:
     params=main.load_test_data("test_data.yaml"),
     ids=lambda x: x.get("description", "Unknown"),
 )
-def test_case(request):
+def test_case(request: pytest.FixtureRequest):
     """
     Fixture that provides one test case at a time from test_data.yaml.
     """

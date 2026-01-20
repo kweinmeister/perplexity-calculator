@@ -1,3 +1,4 @@
+import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Optional
@@ -24,8 +25,6 @@ class ModelContext:
             onnx_filename = "model.onnx"
             config_path = os.path.join(self.model_path, "genai_config.json")
             if os.path.exists(config_path):
-                import json
-
                 try:
                     with open(config_path, "r") as f:
                         config = json.load(f)

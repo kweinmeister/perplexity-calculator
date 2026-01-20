@@ -1,5 +1,6 @@
 from typing import Callable
 
+import os
 import pytest
 
 import model
@@ -48,7 +49,6 @@ def test_perplexity_functions(
         expected = None
         if isinstance(entry, dict):
             # Check which file from the expected list exists in the model path
-            import os
 
             found_file = False
             for filename, val in entry.items():

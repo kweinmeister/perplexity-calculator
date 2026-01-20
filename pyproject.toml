@@ -9,6 +9,7 @@ dependencies = [
     "numpy>=2.4.1",
     "onnxruntime-genai>=0.11.4",
     "tokenizers>=0.22.2",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]
@@ -16,7 +17,8 @@ dev = [
     "memray>=1.19.1",
     "pytest>=9.0.2",
     "pytest-benchmark>=5.2.3",
-    "pyyaml>=6.0.3",
+    "ruff>=0.14.13",
+    "ty>=0.0.12",
 ]
 
 [tool.pyrefly]

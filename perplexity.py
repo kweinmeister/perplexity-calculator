@@ -6,6 +6,26 @@ import onnxruntime_genai as og
 from model import ModelContext
 
 
+def _process_logits_chunk(
+    logits_list: list[np.ndarray], targets_list: list[int]
+) -> tuple[float, int]:
+    """Calculates NLL sum and count for a chunk of logits and targets."""
+    chunk_logits = np.stack(logits_list)
+    chunk_targets = np.array(targets_list)
+
+    c = np.max(chunk_logits, axis=1, keepdims=True)
+    lse = c + np.log(np.sum(np.exp(chunk_logits - c), axis=1, keepdims=True))
+
+    row_indices = np.arange(len(chunk_targets))
+    target_logits = chunk_logits[row_indices, chunk_targets]
+
+    # Sum of NLL for this chunk
+    # NLL = lse - target_logits
+    chunk_nll_sum = np.sum(lse.squeeze() - target_logits)
+
+    return float(chunk_nll_sum), len(chunk_targets)
+
+
 def calculate_perplexity_onnxruntime_genai(context: ModelContext, text: str) -> float:
     """Calculates perplexity using optimized NumPy operations."""
     tokenizer = context.tokenizer
@@ -41,44 +61,24 @@ def calculate_perplexity_onnxruntime_genai(context: ModelContext, text: str) -> 
     for i in range(len(input_ids_int32) - 1):
         append_tokens(input_ids_int32[i : i + 1])
         logits_list.append(get_logits()[0, 0, :])
-        targets_list.append(input_ids_int32[i + 1])
+        targets_list.append(int(input_ids_int32[i + 1]))
 
         if len(logits_list) >= chunk_size:
             # Process chunk
-            chunk_logits = np.stack(logits_list)
-            chunk_targets = np.array(targets_list)
-
-            c = np.max(chunk_logits, axis=1, keepdims=True)
-            lse = c + np.log(np.sum(np.exp(chunk_logits - c), axis=1, keepdims=True))
-
-            row_indices = np.arange(len(chunk_targets))
-            target_logits = chunk_logits[row_indices, chunk_targets]
-
-            # Sum of NLL for this chunk
-            # NLL = lse - target_logits
-            chunk_nll_sum = np.sum(lse.squeeze() - target_logits)
-
+            chunk_nll_sum, chunk_count = _process_logits_chunk(
+                logits_list, targets_list
+            )
             nll_sum += chunk_nll_sum
-            count += len(chunk_targets)
+            count += chunk_count
 
             logits_list = []
             targets_list = []
 
     # Process remaining logits
     if logits_list:
-        chunk_logits = np.stack(logits_list)
-        chunk_targets = np.array(targets_list)
-
-        c = np.max(chunk_logits, axis=1, keepdims=True)
-        lse = c + np.log(np.sum(np.exp(chunk_logits - c), axis=1, keepdims=True))
-
-        row_indices = np.arange(len(chunk_targets))
-        target_logits = chunk_logits[row_indices, chunk_targets]
-
-        chunk_nll_sum = np.sum(lse.squeeze() - target_logits)
-
+        chunk_nll_sum, chunk_count = _process_logits_chunk(logits_list, targets_list)
         nll_sum += chunk_nll_sum
-        count += len(chunk_targets)
+        count += chunk_count
 
     if count == 0:
         return 0.0
