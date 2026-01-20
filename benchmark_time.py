@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -9,9 +10,7 @@ import perplexity
 
 @pytest.fixture
 def test_data() -> list[str]:
-    """
-    Fixture that provides the list of all test texts.
-    """
+    """Fixture that provides the list of all test texts."""
     data = main.load_test_data()
     return main.get_test_texts(data)
 
@@ -30,9 +29,7 @@ def test_benchmark_perplexity(
     test_data: list[str],
     calc_fn: Callable[[model.ModelContext, str], float],
 ) -> None:
-    """
-    Benchmark the perplexity calculation on a batch of test examples.
-    """
+    """Benchmark the perplexity calculation on a batch of test examples."""
     context, _ = loaded_model
 
     def run_batch() -> None:

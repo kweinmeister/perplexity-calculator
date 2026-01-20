@@ -1,21 +1,25 @@
 import json
+import logging
 import os
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 import onnxruntime as ort
 import onnxruntime_genai as og
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class ModelContext:
     model_path: str
     tokenizer: Any  # Should comply with encode(str) -> np.ndarray
-    og_model: Optional[og.Model] = None
-    _ort_session: Optional[ort.InferenceSession] = field(default=None, init=False)
-    _empty_past_key_values: Optional[dict[str, np.ndarray]] = field(
-        default=None, init=False
+    og_model: og.Model | None = None
+    _ort_session: ort.InferenceSession | None = field(default=None, init=False)
+    _empty_past_key_values: dict[str, np.ndarray] | None = field(
+        default=None,
+        init=False,
     )
 
     @property
@@ -26,14 +30,14 @@ class ModelContext:
             config_path = os.path.join(self.model_path, "genai_config.json")
             if os.path.exists(config_path):
                 try:
-                    with open(config_path, "r") as f:
+                    with open(config_path) as f:
                         config = json.load(f)
                     if "model" in config and "decoder" in config["model"]:
                         filename = config["model"]["decoder"].get("filename")
                         if filename:
                             onnx_filename = filename
-                except Exception as e:
-                    print(f"Warning: Failed to parse genai_config.json: {e}")
+                except Exception:
+                    pass
 
             onnx_file = os.path.join(self.model_path, onnx_filename)
             if not os.path.exists(onnx_file):
@@ -42,13 +46,15 @@ class ModelContext:
                 if os.path.exists(onnx_file_subdir):
                     onnx_file = onnx_file_subdir
 
-            print(f"Loading ORT session from: {onnx_file}")
+            logger.info("Initializing ONNX Runtime session from %s", onnx_file)
             self._ort_session = ort.InferenceSession(onnx_file)
         return self._ort_session
 
     @property
     def empty_past_key_values(self) -> dict[str, np.ndarray]:
+        """Returns initialized but empty past_key_values tensors for low-level ORT."""
         if self._empty_past_key_values is None:
+            logger.info("Initializing empty KV cache tensors for low-level session")
             self._empty_past_key_values = {}
             session = self.ort_session
             for input_meta in session.get_inputs():
@@ -77,6 +83,7 @@ class ModelContext:
                         dtype = np.float64
 
                     self._empty_past_key_values[input_meta.name] = np.zeros(
-                        shape, dtype=dtype
+                        shape,
+                        dtype=dtype,
                     )
         return self._empty_past_key_values

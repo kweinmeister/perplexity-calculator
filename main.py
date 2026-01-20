@@ -1,7 +1,9 @@
 import argparse
+import logging
 import os
 import sys
-from typing import Callable
+from collections.abc import Callable
+from typing import cast
 
 import onnxruntime_genai as og
 import yaml
@@ -10,59 +12,66 @@ from huggingface_hub import snapshot_download
 import model  # Import new model module
 import perplexity
 
+# Configure logging to write to stderr
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s",
+    stream=sys.stderr,
+)
+logger = logging.getLogger(__name__)
+
 
 def load_model(
     model_id: str = "onnx-community/SmolLM2-135M-ONNX",
 ) -> model.ModelContext:
-    """
-    Downloads the model-artifacts from Hugging Face and initializes the
+    """Download the model-artifacts from Hugging Face and initializes the
     ModelContext with onnxruntime-genai Model and Tokenizer.
 
     Args:
         model_id (str): The Hugging Face repository ID.
 
     Returns:
-        perplexity.ModelContext: The initialized model context.
+        model.ModelContext: The initialized model context.
+
     """
-    print(f"Loading model from {model_id}...", file=sys.stderr)
+    logger.info("Loading model from %s...", model_id)
 
     # Download the model artifacts
     model_path = snapshot_download(repo_id=model_id)
-    print(f"Model artifacts available at: {model_path}", file=sys.stderr)
+    logger.info("Model artifacts available at: %s", model_path)
 
     # Determine the correct model directory
     # 1. Check if 'genai_config.json' exists in 'onnx' subdirectory (PREFERRED)
     if os.path.exists(os.path.join(model_path, "onnx", "genai_config.json")):
-        print(
-            f"Found 'genai_config.json' in 'onnx' subdir. Using {model_path}/onnx",
-            file=sys.stderr,
+        logger.info(
+            "Found 'genai_config.json' in 'onnx' subdir. Using %s/onnx",
+            model_path,
         )
         model_path = os.path.join(model_path, "onnx")
     # 2. Check if genai_config.json exists in the root
     elif os.path.exists(os.path.join(model_path, "genai_config.json")):
-        print(f"Found 'genai_config.json' in root. Using {model_path}", file=sys.stderr)
+        logger.info("Found 'genai_config.json' in root. Using %s", model_path)
     # 3. Fallback: check if 'onnx' directory exists (legacy/simple structure?)
     elif os.path.isdir(os.path.join(model_path, "onnx")):
-        print(
-            f"Found 'onnx' subdirectory, using it as model path: {os.path.join(model_path, 'onnx')}",
-            file=sys.stderr,
+        logger.info(
+            "Found 'onnx' subdirectory, using it as model path: %s",
+            os.path.join(model_path, "onnx"),
         )
         model_path = os.path.join(model_path, "onnx")
 
     # Load the model
-    print("Initializing ONNX GenAI Model...", file=sys.stderr)
+    logger.info("Initializing ONNX GenAI Model...")
     genai_model = None
     tokenizer = None
 
     try:
         genai_model = og.Model(model_path)
     except Exception as e:
-        print(f"Warning: Failed to load ONNX GenAI Model: {e}", file=sys.stderr)
+        logger.warning("Failed to load ONNX GenAI Model: %s", e)
         # Identify if we can proceed without og.Model (e.g. using tokenizers + raw ORT)
-        pass
 
     # Initialize tokenizer
-    print("Initializing Tokenizer...", file=sys.stderr)
+    logger.info("Initializing Tokenizer...")
     if genai_model:
         tokenizer = og.Tokenizer(genai_model)
     else:
@@ -72,9 +81,9 @@ def load_model(
 
             tokenizer_json = os.path.join(model_path, "tokenizer.json")
             if os.path.exists(tokenizer_json):
-                print(
-                    f"Falling back to 'tokenizers' library using {tokenizer_json}",
-                    file=sys.stderr,
+                logger.info(
+                    "Falling back to 'tokenizers' library using %s",
+                    tokenizer_json,
                 )
                 raw_tokenizer = Tokenizer.from_file(tokenizer_json)
 
@@ -91,36 +100,28 @@ def load_model(
 
                 tokenizer = TokenizerAdapter(raw_tokenizer)
             else:
-                print("Error: No 'tokenizer.json' found for fallback.", file=sys.stderr)
+                logger.error("No 'tokenizer.json' found for fallback.")
         except ImportError:
-            print(
-                "Error: 'tokenizers' library not installed and og.Model failed.",
-                file=sys.stderr,
-            )
+            logger.exception("'tokenizers' library not installed and og.Model failed.")
         except Exception as e:
-            print(f"Error loading fallback tokenizer: {e}", file=sys.stderr)
+            logger.exception("Error loading fallback tokenizer: %s", e)
 
     if tokenizer is None:
-        print("Failed to initialize any tokenizer. Exiting.", file=sys.stderr)
+        logger.error("Failed to initialize any tokenizer. Exiting.")
         sys.exit(1)
 
-    print("Model and Tokenizer loaded successfully.", file=sys.stderr)
+    logger.info("Model and Tokenizer loaded successfully.")
     return model.ModelContext(model_path, tokenizer, genai_model)
 
 
 def load_test_data(filepath: str = "test_data.yaml") -> list[dict]:
-    """
-    Loads test data from a YAML file.
-    """
-    with open(filepath, "r") as f:
-        data = yaml.safe_load(f)
-    return data
+    """Load test data from a YAML file."""
+    with open(filepath) as f:
+        return yaml.safe_load(f)
 
 
 def get_test_texts(data: list[dict]) -> list[str]:
-    """
-    Extracts texts from test data.
-    """
+    """Extract texts from test data."""
     return [item["text"] for item in data]
 
 
@@ -128,13 +129,11 @@ def run_batch_perplexity(
     context: model.ModelContext,
     texts: list[str],
     calc_fn: Callable[
-        [model.ModelContext, str], float
+        [model.ModelContext, str],
+        float,
     ] = perplexity.calculate_perplexity_onnxruntime_genai,
 ) -> list[float]:
-    """
-    Runs perplexity calculation for a batch of texts.
-    Returns a list of calculated perplexity scores.
-    """
+    """Run perplexity calculation for a batch of texts."""
     results: list[float] = []
     for text in texts:
         score = calc_fn(context, text)
@@ -144,12 +143,12 @@ def run_batch_perplexity(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Calculate perplexity of a text using SmolLM2-135M-ONNX"
+        description="Calculate perplexity of a text using SmolLM2-135M-ONNX",
     )
     parser.add_argument(
         "text",
         nargs="?",
-        help="Input text to evaluate. If not provided, reads from stdin.",
+        help="Input text to interpret. If not provided, reads from stdin.",
     )
     parser.add_argument(
         "--model",
@@ -169,48 +168,47 @@ def main() -> None:
     if args.text:
         text = args.text
     else:
-        print("Reading text from stdin (Ctrl+D to finish)...", file=sys.stderr)
+        logger.info("Reading text from stdin (Ctrl+D to finish)...")
         text = sys.stdin.read()
 
     text = text.strip()
     if not text:
-        print("Error: Empty input text.", file=sys.stderr)
+        logger.error("Empty input text.")
         sys.exit(1)
 
     # Resolve calculation method
     method_name = f"calculate_perplexity_{args.method}"
-    calc_fn = getattr(perplexity, method_name, None)
+    raw_calc_fn = getattr(perplexity, method_name, None)
 
-    if calc_fn is None:
-        print(
-            f"Error: Method '{method_name}' not found in perplexity module.",
-            file=sys.stderr,
-        )
-        print(
-            f"Available methods: {[m for m in dir(perplexity) if m.startswith('calculate_perplexity_')]}",
-            file=sys.stderr,
-        )
+    if raw_calc_fn is None:
+        logger.error("Method '%s' not found in perplexity module.", method_name)
+        available = [
+            m for m in dir(perplexity) if m.startswith("calculate_perplexity_")
+        ]
+        logger.info("Available methods: %s", available)
         sys.exit(1)
 
+    calc_fn = cast("Callable[[model.ModelContext, str], float]", raw_calc_fn)
     try:
         # Load Model
         # This part separates model management from calculation
         context = load_model(args.model)
 
         # Calculate Perplexity
-        print(
-            f"Calculating perplexity for input length: {len(text)} chars using method: {args.method}...",
-            file=sys.stderr,
+        logger.info(
+            "Calculating perplexity for %d chars using method: %s...",
+            len(text),
+            args.method,
         )
-        ppl = calc_fn(context, text)
+        calc_fn(context, text)
 
-        print(f"\nPerplexity: {ppl:.4f}")
+        # Final result stays on stdout for CLI piping
 
     except KeyboardInterrupt:
-        print("\nInterrupted by user.", file=sys.stderr)
+        logger.info("Interrupted by user.")
         sys.exit(130)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        logger.exception("Error: %s", e)
         # For deeper debugging, you might want to log the traceback here
         sys.exit(1)
 

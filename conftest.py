@@ -6,9 +6,7 @@ import perplexity
 
 @pytest.fixture(scope="session")
 def loaded_model() -> tuple[perplexity.ModelContext, str]:
-    """
-    Fixture to load the model and tokenizer once for the entire test session.
-    """
+    """Fixture to load the model and tokenizer once for the entire test session."""
     model_id = "onnx-community/Qwen3-0.6B-DQ-ONNX"
     context = main.load_model(model_id)
     return context, model_id
@@ -19,7 +17,5 @@ def loaded_model() -> tuple[perplexity.ModelContext, str]:
     ids=lambda x: x.get("description", "Unknown"),
 )
 def test_case(request: pytest.FixtureRequest):
-    """
-    Fixture that provides one test case at a time from test_data.yaml.
-    """
+    """Fixture that provides one test case at a time from test_data.yaml."""
     return request.param

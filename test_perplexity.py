@@ -1,10 +1,13 @@
-from typing import Callable
-
+import logging
 import os
+from collections.abc import Callable
+
 import pytest
 
 import model
 import perplexity
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
@@ -20,8 +23,7 @@ def test_perplexity_functions(
     calc_fn: Callable[[model.ModelContext, str], float],
     test_case: dict,
 ) -> None:
-    """
-    Test that calculates perplexity and checks against expectations (if any).
+    """Test that calculates perplexity and checks against expectations (if any).
     This creates a matrix of (calculation functions) x (test examples).
     """
     context, model_id = loaded_model
@@ -35,9 +37,9 @@ def test_perplexity_functions(
     # Perform calculation
     actual = calc_fn(context, text)
     method_name = getattr(calc_fn, "__name__", "Unknown")
-    print(f"\nMethod: {method_name}")
-    print(f"Example: {description}")
-    print(f"Perplexity: {actual:.4f}")
+    logger.info("Method: %s", method_name)
+    logger.info("Example: %s", description)
+    logger.info("Perplexity: %.4f", actual)
 
     # Basic assertion
     assert isinstance(actual, float)
@@ -57,33 +59,34 @@ def test_perplexity_functions(
                 candidate = os.path.join(context.model_path, filename)
                 if os.path.exists(candidate):
                     expected = val
-                    print(f"Matched expectation for file: {filename}")
+                    logger.info("Matched expectation for file: %s", filename)
                     found_file = True
                     break
 
             if not found_file:
-                # Fallback: if we simply have a float value in the dict (backward compat but shouldn't happen with new schema)
-                # Or just print warning
-                print(
-                    f"Warning: No expected file found directly in {context.model_path}. Checking keys..."
+                logger.warning(
+                    "No expected file found directly in %s. Checking keys...",
+                    context.model_path,
                 )
-                # Blindly take the first one? No, unsafe.
-                # Let's assume standard names
-                pass
         else:
             expected = entry
 
         if expected is not None:
-            print(
-                f"Consistency Check ({model_id}): Actual={actual:.4f}, Expected={expected:.4f}"
+            logger.info(
+                "Consistency Check (%s): Actual=%.4f, Expected=%.4f",
+                model_id,
+                actual,
+                expected,
             )
             assert actual == pytest.approx(expected, rel=5e-2)
         else:
-            print(
-                f"Skipping consistency check: Could not match active model file to expected keys {list(entry.keys())}"
+            logger.warning(
+                "Skipping consistency check: Could not match active model file to expected keys %s",
+                list(entry.keys()),
             )
     else:
-        print(
-            f"Basic Validity Check: No model-specific expectation found for {model_id}"
+        logger.info(
+            "Basic Validity Check: No model-specific expectation found for %s",
+            model_id,
         )
         assert actual >= 1.0

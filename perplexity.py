@@ -7,7 +7,8 @@ from model import ModelContext
 
 
 def _process_logits_chunk(
-    logits_list: list[np.ndarray], targets_list: list[int]
+    logits_list: list[np.ndarray],
+    targets_list: list[int],
 ) -> tuple[float, int]:
     """Calculates NLL sum and count for a chunk of logits and targets."""
     chunk_logits = np.stack(logits_list)
@@ -66,7 +67,8 @@ def calculate_perplexity_onnxruntime_genai(context: ModelContext, text: str) -> 
         if len(logits_list) >= chunk_size:
             # Process chunk
             chunk_nll_sum, chunk_count = _process_logits_chunk(
-                logits_list, targets_list
+                logits_list,
+                targets_list,
             )
             nll_sum += chunk_nll_sum
             count += chunk_count
@@ -87,7 +89,8 @@ def calculate_perplexity_onnxruntime_genai(context: ModelContext, text: str) -> 
 
 
 def calculate_perplexity_onnxruntime_optimized(
-    context: ModelContext, text: str
+    context: ModelContext,
+    text: str,
 ) -> float:
     """Calculates perplexity using single-pass ONNX Runtime inference."""
     tokenizer = context.tokenizer
@@ -109,7 +112,7 @@ def calculate_perplexity_onnxruntime_optimized(
     inputs.update(context.empty_past_key_values)
 
     outputs = session.run(None, inputs)
-    logits = cast(np.ndarray, outputs[0])  # [1, SeqLen, Vocab]
+    logits = cast("np.ndarray", outputs[0])  # [1, SeqLen, Vocab]
 
     # We want logits for t=0..N-2 to predict t=1..N-1
     # logits shape: [1, SeqLen, Vocab]
@@ -132,7 +135,8 @@ def calculate_perplexity_onnxruntime_optimized(
 
 
 def calculate_perplexity_onnxruntime_baseline(
-    context: ModelContext, text: str
+    context: ModelContext,
+    text: str,
 ) -> float:
     """Calculates perplexity using sequential execution with manual KV caching."""
     tokenizer = context.tokenizer
@@ -176,7 +180,7 @@ def calculate_perplexity_onnxruntime_baseline(
         # Run inference
         outputs = session.run(None, inputs)
 
-        logits = cast(np.ndarray, outputs[0])  # (1, 1, vocab_size)
+        logits = cast("np.ndarray", outputs[0])  # (1, 1, vocab_size)
 
         # Calculate loss (logits shape: 1, 1, vocab_size)
         next_token_logits = logits[0, 0, :]
@@ -195,10 +199,10 @@ def calculate_perplexity_onnxruntime_baseline(
         present_values = outputs[1:]
         present_names = output_names[1:]
 
-        for name, val in zip(present_names, present_values):
+        for name, val in zip(present_names, present_values, strict=False):
             # name is like 'present.0.key'
             # we want key to be 'past_key_values.0.key'
             new_key = name.replace("present", "past_key_values")
-            past_key_values[new_key] = cast(np.ndarray, val)
+            past_key_values[new_key] = cast("np.ndarray", val)
 
     return float(np.exp(nll_sum / count))
