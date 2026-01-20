@@ -1,13 +1,13 @@
 import pytest
 
 import main
-import perplexity
+import model
 
 
 @pytest.fixture(scope="session")
-def loaded_model() -> tuple[perplexity.ModelContext, str]:
+def loaded_model() -> tuple[model.ModelContext, str]:
     """Fixture to load the model and tokenizer once for the entire test session."""
-    model_id = "onnx-community/Qwen3-0.6B-DQ-ONNX"
+    model_id = "onnx-community/SmolLM2-135M-ONNX"
     context = main.load_model(model_id)
     return context, model_id
 

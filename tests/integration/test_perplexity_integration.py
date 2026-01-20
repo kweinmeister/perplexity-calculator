@@ -64,9 +64,9 @@ def test_perplexity_functions(
                     break
 
             if not found_file:
-                logger.warning(
-                    "No expected file found directly in %s. Checking keys...",
-                    context.model_path,
+                pytest.fail(
+                    f"Could not find a matching model file for model_id '{model_id}' "
+                    f"in {context.model_path} with expected files {list(entry.keys())}",
                 )
         else:
             expected = entry

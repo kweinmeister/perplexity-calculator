@@ -5,6 +5,7 @@ import sys
 from collections.abc import Callable
 from typing import cast
 
+import numpy as np  # Moved from TokenizerAdapter.encode
 import onnxruntime_genai as og
 import yaml
 from huggingface_hub import snapshot_download
@@ -93,8 +94,6 @@ def load_model(
                         self.raw = raw
 
                     def encode(self, text):
-                        import numpy as np
-
                         encoded = self.raw.encode(text)
                         return np.array(encoded.ids, dtype=np.int32)
 

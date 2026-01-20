@@ -36,8 +36,12 @@ class ModelContext:
                         filename = config["model"]["decoder"].get("filename")
                         if filename:
                             onnx_filename = filename
-                except Exception:
-                    pass
+                except json.JSONDecodeError as e:
+                    logger.warning("Failed to parse genai_config.json: %s", e)
+                except Exception as e:
+                    logger.exception(
+                        "Unexpected error reading genai_config.json: %s", e,
+                    )
 
             onnx_file = os.path.join(self.model_path, onnx_filename)
             if not os.path.exists(onnx_file):

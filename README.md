@@ -34,7 +34,7 @@ This project is managed with [`uv`](https://github.com/astral-sh/uv).
 1. **Clone the repository:**
 
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/kweinmeister/perplexity-calculator
     cd perplexity-calculator
     ```
 
