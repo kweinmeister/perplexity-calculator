@@ -53,7 +53,10 @@ class TestCalculatePerplexityGenAI:
     @patch("perplexity.og.GeneratorParams")
     @patch("perplexity.og.Generator")
     def test_calculation_flow(
-        self, mock_generator_cls, mock_generator_params_cls, mock_context,
+        self,
+        mock_generator_cls,
+        mock_generator_params_cls,
+        mock_context,
     ) -> None:
         # Setup input
         text = "prediction text"
@@ -107,7 +110,8 @@ class TestCalculatePerplexityOptimized:
         mock_context.ort_session.run.return_value = [logits]
 
         score = perplexity.calculate_perplexity_onnxruntime_optimized(
-            mock_context, "foo",
+            mock_context,
+            "foo",
         )
 
         assert score is not None

@@ -199,7 +199,7 @@ def calculate_perplexity_onnxruntime_baseline(
         present_values = outputs[1:]
         present_names = output_names[1:]
 
-        for name, val in zip(present_names, present_values, strict=False):
+        for name, val in zip(present_names, present_values, strict=True):
             # name is like 'present.0.key'
             # we want key to be 'past_key_values.0.key'
             new_key = name.replace("present", "past_key_values")

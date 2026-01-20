@@ -40,7 +40,8 @@ class ModelContext:
                     logger.warning("Failed to parse genai_config.json: %s", e)
                 except Exception as e:
                     logger.exception(
-                        "Unexpected error reading genai_config.json: %s", e,
+                        "Unexpected error reading genai_config.json: %s",
+                        e,
                     )
 
             onnx_file = os.path.join(self.model_path, onnx_filename)
@@ -74,6 +75,11 @@ class ModelContext:
                             elif "seq" in dim.lower():
                                 shape.append(0)
                             else:
+                                logger.warning(
+                                    "Unknown symbolic dimension '%s' in KV cache shape. Assuming 1. "
+                                    "This may cause issues with some models.",
+                                    dim,
+                                )
                                 shape.append(1)
                         else:
                             shape.append(dim)

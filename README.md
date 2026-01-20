@@ -86,7 +86,7 @@ Uses `memray` to profile memory usage:
 
 ```bash
 uv run memray run benchmark_memory.py
-uv run memray summary memray-benchmark_memory.py.*.bin
+uv run memray summary
 ```
 
 ## Contributing

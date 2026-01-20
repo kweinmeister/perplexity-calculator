@@ -90,10 +90,10 @@ def load_model(
 
                 # Create adapter to match OG interface
                 class TokenizerAdapter:
-                    def __init__(self, raw) -> None:
+                    def __init__(self, raw: "Tokenizer") -> None:
                         self.raw = raw
 
-                    def encode(self, text):
+                    def encode(self, text: str) -> np.ndarray:
                         encoded = self.raw.encode(text)
                         return np.array(encoded.ids, dtype=np.int32)
 

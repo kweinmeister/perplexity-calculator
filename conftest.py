@@ -16,6 +16,6 @@ def loaded_model() -> tuple[model.ModelContext, str]:
     params=main.load_test_data("test_data.yaml"),
     ids=lambda x: x.get("description", "Unknown"),
 )
-def test_case(request: pytest.FixtureRequest):
+def test_case(request: pytest.FixtureRequest) -> dict:
     """Fixture that provides one test case at a time from test_data.yaml."""
     return request.param
