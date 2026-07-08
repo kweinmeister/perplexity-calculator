@@ -15,7 +15,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "memray>=1.19.3",
-    "pytest>=9.0.3",
+    "pytest>=9.1.1",
     "pytest-benchmark>=5.2.3",
     "ruff>=0.15.16",
     "ty>=0.0.12",
