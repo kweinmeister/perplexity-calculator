@@ -8,7 +8,7 @@ dependencies = [
     "huggingface-hub>=1.18.0",
     "numpy>=2.4.6",
     "onnxruntime-genai>=0.14.1",
-    "tokenizers>=0.22.2",
+    "tokenizers>=0.23.1",
     "pyyaml>=6.0.3",
 ]
 
