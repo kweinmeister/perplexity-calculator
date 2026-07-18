@@ -5,7 +5,7 @@ description = "A perplexity calculator for Large Language Models using ONNX Runt
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "huggingface-hub>=1.18.0",
+    "huggingface-hub>=1.23.0",
     "numpy>=2.5.1",
     "onnxruntime-genai>=0.14.1",
     "tokenizers>=0.23.1",
