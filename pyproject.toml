@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "huggingface-hub>=1.24.0",
     "numpy>=2.5.1",
-    "onnxruntime-genai>=0.14.1",
+    "onnxruntime-genai>=0.15.0",
     "tokenizers>=0.23.1",
     "pyyaml>=6.0.3",
 ]
