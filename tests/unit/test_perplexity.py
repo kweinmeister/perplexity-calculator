@@ -8,8 +8,8 @@ import pytest
 module_mock = MagicMock()
 sys.modules["onnxruntime_genai"] = module_mock
 
-import perplexity  # noqa: E402
-from model import ModelContext  # noqa: E402
+import perplexity
+from model import ModelContext
 
 
 class TestProcessLogitsChunk:

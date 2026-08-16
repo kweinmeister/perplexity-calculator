@@ -38,10 +38,9 @@ class ModelContext:
                             onnx_filename = filename
                 except json.JSONDecodeError as e:
                     logger.warning("Failed to parse genai_config.json: %s", e)
-                except Exception as e:
+                except Exception:
                     logger.exception(
-                        "Unexpected error reading genai_config.json: %s",
-                        e,
+                        "Unexpected error reading genai_config.json",
                     )
 
             onnx_file = os.path.join(self.model_path, onnx_filename)
