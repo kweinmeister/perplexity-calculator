@@ -67,7 +67,7 @@ def load_model(
 
     try:
         genai_model = og.Model(model_path)
-    except Exception as e:
+    except (RuntimeError, OSError, ValueError) as e:
         logger.warning("Failed to load ONNX GenAI Model: %s", e)
         # Identify if we can proceed without og.Model (e.g. using tokenizers + raw ORT)
 
@@ -102,8 +102,8 @@ def load_model(
                 logger.error("No 'tokenizer.json' found for fallback.")
         except ImportError:
             logger.exception("'tokenizers' library not installed and og.Model failed.")
-        except Exception as e:
-            logger.exception("Error loading fallback tokenizer: %s", e)
+        except Exception:
+            logger.exception("Error loading fallback tokenizer")
 
     if tokenizer is None:
         logger.error("Failed to initialize any tokenizer. Exiting.")
@@ -206,8 +206,8 @@ def main() -> None:
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
         sys.exit(130)
-    except Exception as e:
-        logger.exception("Error: %s", e)
+    except Exception:
+        logger.exception("Error")
         # For deeper debugging, you might want to log the traceback here
         sys.exit(1)
 
